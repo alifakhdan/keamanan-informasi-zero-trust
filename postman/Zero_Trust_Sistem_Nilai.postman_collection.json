@@ -1,0 +1,326 @@
+{
+  "info": {
+    "name": "Zero Trust Security - Sistem Nilai & Transkrip (NIST SP 800-207)",
+    "description": "Koleksi Postman untuk pengujian praktikum Keamanan Informasi Zero Trust Security.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "nilaiDirectUrl", "value": "http://localhost:3001" },
+    { "key": "transkripDirectUrl", "value": "http://localhost:3002" },
+    { "key": "tokenDosen", "value": "" },
+    { "key": "refreshTokenDosen", "value": "" },
+    { "key": "tokenMhs", "value": "" },
+    { "key": "tokenAdmin", "value": "" },
+    { "key": "tokenService", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Autentikasi & Token (4.1 & 4.3)",
+      "item": [
+        {
+          "name": "1.1 Login Dosen Budi (Device Terdaftar - Sukses)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"dosen_budi\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/login", "host": ["http://localhost:3000"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "1.2 Login Dosen Budi (Device Tidak Terdaftar - Ditolak 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Device-ID", "value": "DEV-UNREGISTERED-LAPTOP" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"dosen_budi\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/login", "host": ["http://localhost:3000"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "1.3 Login Mahasiswa Ahmad (Device Terdaftar - Sukses)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Device-ID", "value": "DEV-MHS-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"mhs_ahmad\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/login", "host": ["http://localhost:3000"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "1.4 Login Admin (Device Terdaftar - Sukses)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Device-ID", "value": "DEV-ADMIN-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/login", "host": ["http://localhost:3000"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "1.5 Refresh Token (Perpanjang Access Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshTokenDosen}}\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/refresh", "host": ["http://localhost:3000"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "1.6 Logout (Cabut Refresh Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshTokenDosen}}\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/logout", "host": ["http://localhost:3000"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "1.7 POST /auth/service (Token Service Nilai)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"service-nilai\",\n  \"clientSecret\": \"secret-nilai-client-2024\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/auth/service", "host": ["http://localhost:3000"], "path": ["auth", "service"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Kebijakan Akses & Kontrol Nilai (4.2 & 4.3)",
+      "item": [
+        {
+          "name": "2.1 GET /nilai oleh Mahasiswa Ahmad (Hanya Nilainya)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMhs}}" },
+              { "key": "X-Device-ID", "value": "DEV-MHS-01" }
+            ],
+            "url": { "raw": "http://localhost:3000/nilai", "host": ["http://localhost:3000"], "path": ["nilai"] }
+          }
+        },
+        {
+          "name": "2.2 GET /nilai oleh Dosen Budi (Hanya Kelas yang Diampu)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" }
+            ],
+            "url": { "raw": "http://localhost:3000/nilai", "host": ["http://localhost:3000"], "path": ["nilai"] }
+          }
+        },
+        {
+          "name": "2.3 PUT /nilai/1 oleh Dosen Budi (Dalam Jam Akses - Sukses)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" },
+              { "key": "X-Simulated-Hour", "value": "10" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tugas\": 90,\n  \"uts\": 85,\n  \"uas\": 95\n}"
+            },
+            "url": { "raw": "http://localhost:3000/nilai/1", "host": ["http://localhost:3000"], "path": ["nilai", "1"] }
+          }
+        },
+        {
+          "name": "2.4 PUT /nilai/4 oleh Dosen Budi (IDOR Kelas Dosen Lain - Ditolak 403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" },
+              { "key": "X-Simulated-Hour", "value": "10" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tugas\": 100,\n  \"uts\": 100,\n  \"uas\": 100\n}"
+            },
+            "url": { "raw": "http://localhost:3000/nilai/4", "host": ["http://localhost:3000"], "path": ["nilai", "4"] }
+          }
+        },
+        {
+          "name": "2.5 PUT /nilai/1 di Luar Jam Akses (Simulasi Jam 23.00 - Ditolak 403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" },
+              { "key": "X-Simulated-Hour", "value": "23" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tugas\": 85,\n  \"uts\": 80,\n  \"uas\": 88\n}"
+            },
+            "url": { "raw": "http://localhost:3000/nilai/1", "host": ["http://localhost:3000"], "path": ["nilai", "1"] }
+          }
+        },
+        {
+          "name": "2.6 POST /kelas/1/finalisasi oleh Dosen Budi (Sukses + Sinkron via Gateway)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" },
+              { "key": "X-Simulated-Hour", "value": "14" }
+            ],
+            "url": { "raw": "http://localhost:3000/kelas/1/finalisasi", "host": ["http://localhost:3000"], "path": ["kelas", "1", "finalisasi"] }
+          }
+        },
+        {
+          "name": "2.7 PUT /nilai/1 Setelah Finalisasi (Ditolak 403 ALREADY_FINALIZED)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" },
+              { "key": "X-Device-ID", "value": "DEV-DOSEN-01" },
+              { "key": "X-Simulated-Hour", "value": "14" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tugas\": 99\n}"
+            },
+            "url": { "raw": "http://localhost:3000/nilai/1", "host": ["http://localhost:3000"], "path": ["nilai", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Transkrip & Least Privilege (4.2)",
+      "item": [
+        {
+          "name": "3.1 GET Transkrip Sendiri oleh Mahasiswa Ahmad (220001 - Sukses)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMhs}}" },
+              { "key": "X-Device-ID", "value": "DEV-MHS-01" }
+            ],
+            "url": { "raw": "http://localhost:3000/transkrip/220001", "host": ["http://localhost:3000"], "path": ["transkrip", "220001"] }
+          }
+        },
+        {
+          "name": "3.2 GET Transkrip Mahasiswa Lain oleh Mahasiswa Ahmad (Ditolak 403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMhs}}" },
+              { "key": "X-Device-ID", "value": "DEV-MHS-01" }
+            ],
+            "url": { "raw": "http://localhost:3000/transkrip/220002", "host": ["http://localhost:3000"], "path": ["transkrip", "220002"] }
+          }
+        },
+        {
+          "name": "3.3 GET Transkrip oleh Admin (Semua NIM Diizinkan - Sukses)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "X-Device-ID", "value": "DEV-ADMIN-01" }
+            ],
+            "url": { "raw": "http://localhost:3000/transkrip/220002", "host": ["http://localhost:3000"], "path": ["transkrip", "220002"] }
+          }
+        },
+        {
+          "name": "3.4 User Memanggil POST /transkrip/sinkron Langsung (Ditolak 403 Service Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "X-Device-ID", "value": "DEV-ADMIN-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kelasId\": 1\n}"
+            },
+            "url": { "raw": "http://localhost:3000/transkrip/sinkron", "host": ["http://localhost:3000"], "path": ["transkrip", "sinkron"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Defense in Depth & Bypass Perimeter (4.1)",
+      "item": [
+        {
+          "name": "4.1 Akses Langsung ke Port 3001 Tanpa Gateway Secret (Ditolak 403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenDosen}}" }
+            ],
+            "url": { "raw": "http://localhost:3001/nilai", "host": ["http://localhost:3001"], "path": ["nilai"] }
+          }
+        },
+        {
+          "name": "4.2 Akses ke Port 3001 dengan Secret tapi Tanpa Token (Ditolak 401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Gateway-Secret", "value": "pep-gateway-internal-secret-token-xyz" }
+            ],
+            "url": { "raw": "http://localhost:3001/nilai", "host": ["http://localhost:3001"], "path": ["nilai"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Audit Log (4.4)",
+      "item": [
+        {
+          "name": "5.1 Lihat Seluruh Audit Log Keputusan PDP Gateway",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "http://localhost:3000/audit-logs?limit=50", "host": ["http://localhost:3000"], "path": ["audit-logs"], "query": [{ "key": "limit", "value": "50" }] }
+          }
+        }
+      ]
+    }
+  ]
+}
